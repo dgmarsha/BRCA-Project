@@ -5,9 +5,9 @@ library(TCGAbiolinks)
 
 
 
-#install.packages("survival")
-#install.packages("survminer")
-#install.packages("arsenal")
+install.packages("survival")
+install.packages("survminer")
+install.packages("arsenal")
 
 #if you get an error saying you need a CRAN mirror, it is with the above. Opening an R terminal
 # and manually installing the packages worked for me
@@ -18,7 +18,7 @@ library(TCGAbiolinks)
 
  
 clin_query <- GDCquery(project = "TCGA-BRCA", data.category="Clinical", file.type="xml")
-#GDCdownload( clin_query ) #should only need this command once. This downloads the files onto your system.
+GDCdownload( clin_query ) #should only need this command once. This downloads the files onto your system.
 clinic <- GDCprepare_clinic(clin_query, clinical.info="patient")  #these download clinical data into clinic matrix
 names(clinic)[names(clinic) == "days_to_last_followup"] = "days_to_last_follow_up"   # fixes missing
 # underscore, would interupt TCGA_analyze looking for that column otherwise
@@ -80,17 +80,17 @@ copy_clinic = clinic[-NA_list,] #copy is clinic but NA subtype rows excluded
 young_clinic = copy_clinic[young_list,] #young is copy_clinic but just young (also no NA) 
 old_clinic = copy_clinic[-young_list,] #old is copy_clinic but excluding young (also no NA)
 
-TCGAanalyze_survival( copy_clinic, "PAM50", filename="PAM50_survival.pdf")
+TCGAanalyze_survival( copy_clinic, "PAM50", filename="figures/PAM50_survival.pdf")
 
-TCGAanalyze_survival( young_clinic, "PAM50", filename="young_PAM50_survival.pdf")
+TCGAanalyze_survival( young_clinic, "PAM50", filename="figures/young_PAM50_survival.pdf")
 
-TCGAanalyze_survival( old_clinic, "PAM50", filename="older_PAM50_survival.pdf")
+TCGAanalyze_survival( old_clinic, "PAM50", filename="figures/older_PAM50_survival.pdf")
 
 #TCGA_analyze grabs several columns and provided column to make Kaplan Meier survival plots
 
 
 
-jpeg("distributetest.jpg")
+jpeg("figures/distributetest.jpg")
 barplot(table(copy_clinic$PAM50), main = "Distribution of Subtypes for Patients in TCGA Database",
 	xlab = "PAM50 Subtype", ylab ="Number of Tumors")
 dev.off()
@@ -98,12 +98,12 @@ dev.off()
 #barplot makes a bargraph. Here shows distribution of subtypes. Using modified clinics to focus on young or old
 
 
-jpeg("youngdistributetest.jpg")
+jpeg("figures/youngdistributetest.jpg")
 barplot(table(young_clinic$PAM50), main = "Subtype distribution for young patients(<40 years)",
         xlab = "PAM50 Subtype", ylab ="Number of Tumors")
 dev.off()
 
-jpeg("olderdistributetest.jpg")
+jpeg("figures/olderdistributetest.jpg")
 barplot(table(old_clinic$PAM50), main = "Subtype distribution for older patients(>=40 years)",
         xlab = "PAM50 Subtype", ylab ="Number of Tumors")
 dev.off()
