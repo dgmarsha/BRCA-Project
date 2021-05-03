@@ -1,5 +1,5 @@
 #!/bin/bash
-
+mkdir figures
 Rscript project.R
 Rscript Grace_code.R
 

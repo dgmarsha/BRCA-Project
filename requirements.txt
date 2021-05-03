@@ -4,3 +4,6 @@ seaborn
 numpy
 scipy
 jupyter
+umap
+sklearn.impute
+sklearn.manifold

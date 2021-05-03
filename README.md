@@ -14,3 +14,9 @@ to make appropriate conda environ
 run ./run_all_bash.sh to make the figures
 
 will put figures in a figures directory
+
+
+
+make sure have a system that can run r. 
+
+ if on USC cluster, run module load r first
