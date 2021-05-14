@@ -56,7 +56,7 @@ clinic$PAM50 = PAM50
 
 
 NA_list = c()
-
+old_list = c()
 young_list = c()
 counter = 0
 for (tumor in PAM50){
@@ -73,6 +73,9 @@ for (age in age_groups){
         if (age =="Young"){
                 young_list =c(young_list,counter)
         }
+	if(age=="Old"){
+		old_list =c(old_list,counter)
+	}
 }
 #young list now holds row numbers of patients that are young
 
@@ -87,8 +90,14 @@ TCGAanalyze_survival( young_clinic, "PAM50", filename="figures/young_PAM50_survi
 TCGAanalyze_survival( old_clinic, "PAM50", filename="figures/older_PAM50_survival.pdf")
 
 #TCGA_analyze grabs several columns and provided column to make Kaplan Meier survival plots
+install.packages("RColorBrewer")
+library(RColorBrewer)
+colour <- brewer.pal(5, "Set3")
+subtype_percentages <- data.frame("Young" =apply(young_clinic$PAM50, function(x){x*100/sum(x)),
+	 "Mid" = apply(old_clinic[-old_list,]$PAM50, function(x){x*100/sum(x)),
+	 "Old" = apply(old_clinic$PAM50, function(x){x*100/sum(x)))
 
-
+str(subtype_percentages)
 
 jpeg("figures/distributetest.jpg")
 barplot(table(copy_clinic$PAM50), main = "Distribution of Subtypes for Patients in TCGA Database",
