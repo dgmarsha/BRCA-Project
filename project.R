@@ -5,9 +5,9 @@ library(TCGAbiolinks)
 
 
 
-install.packages("survival")
-install.packages("survminer")
-install.packages("arsenal")
+#install.packages("survival")
+#install.packages("survminer")
+#install.packages("arsenal")
 
 #if you get an error saying you need a CRAN mirror, it is with the above. Opening an R terminal
 # and manually installing the packages worked for me
@@ -18,7 +18,7 @@ install.packages("arsenal")
 
  
 clin_query <- GDCquery(project = "TCGA-BRCA", data.category="Clinical", file.type="xml")
-GDCdownload( clin_query ) #should only need this command once. This downloads the files onto your system.
+#GDCdownload( clin_query ) #should only need this command once. This downloads the files onto your system.
 clinic <- GDCprepare_clinic(clin_query, clinical.info="patient")  #these download clinical data into clinic matrix
 names(clinic)[names(clinic) == "days_to_last_followup"] = "days_to_last_follow_up"   # fixes missing
 # underscore, would interupt TCGA_analyze looking for that column otherwise
@@ -83,21 +83,53 @@ copy_clinic = clinic[-NA_list,] #copy is clinic but NA subtype rows excluded
 young_clinic = copy_clinic[young_list,] #young is copy_clinic but just young (also no NA) 
 old_clinic = copy_clinic[-young_list,] #old is copy_clinic but excluding young (also no NA)
 
-TCGAanalyze_survival( copy_clinic, "PAM50", filename="figures/PAM50_survival.pdf")
+#TCGAanalyze_survival( copy_clinic, "PAM50", filename="figures/PAM50_survival.pdf")
 
-TCGAanalyze_survival( young_clinic, "PAM50", filename="figures/young_PAM50_survival.pdf")
+#TCGAanalyze_survival( young_clinic, "PAM50", filename="figures/young_PAM50_survival.pdf")
 
-TCGAanalyze_survival( old_clinic, "PAM50", filename="figures/older_PAM50_survival.pdf")
+#TCGAanalyze_survival( old_clinic, "PAM50", filename="figures/older_PAM50_survival.pdf")
 
 #TCGA_analyze grabs several columns and provided column to make Kaplan Meier survival plots
-install.packages("RColorBrewer")
+#install.packages("RColorBrewer")
 library(RColorBrewer)
 colour <- brewer.pal(5, "Set3")
-subtype_percentages <- data.frame("Young" =apply(young_clinic$PAM50, function(x){x*100/sum(x)),
-	 "Mid" = apply(old_clinic[-old_list,]$PAM50, function(x){x*100/sum(x)),
-	 "Old" = apply(old_clinic$PAM50, function(x){x*100/sum(x)))
+funct = function(x) {
+	list_subtypes = c("LumA", "LumB","Basal", "Her2", "Normal")
+	percents = c()
+	for(type in list_subtypes){
+		percent = 0
+		for(subtype in x){
+			 if (subtype ==type){
+				percent = percent +1
+			}
+		}
+		
+		percent = percent
+		percents = c(percents,percent)
+	}
+	print(percents)
+	count =0
+	sum = sum(percents)
+	for (elem in percents){
+		count = count+1
+		percents[count] = elem*100/sum
+	}
+	print(percents)
+	#percents = lapply(percents,functon(x){x*100/sum(x)}) 
+}
+young_rates = funct(young_clinic$PAM50)
+mid_rates = funct(old_clinic[-old_list,]$PAM50)
+old_rates = funct(old_clinic$PAM50)	
+subtype_percentages = cbind(c(young_rates),c(mid_rates),c(old_rates))
+print(subtype_percentages[,1])
+colnames(subtype_percentages) = c("Young","Mid", "Old")
+rownames(subtype_percentages) = c("LumA", "LumB","Basal", "Her2", "Normal")
+print(subtype_percentages[,1])
 
-str(subtype_percentages)
+jpeg("distributetestper.jpg")
+barplot(subtype_percentages,col = colour, main = "Distribution of Subtypes for Patients in TCGA Database",
+        xlab = "PAM50 Subtype", ylab ="Percentage of Tumors")
+dev.off()
 
 jpeg("figures/distributetest.jpg")
 barplot(table(copy_clinic$PAM50), main = "Distribution of Subtypes for Patients in TCGA Database",
